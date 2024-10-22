@@ -1,0 +1,5 @@
+[install]
+registry = "https://mirrors.cloud.tencent.com/npm/"
+
+[install.scopes]
+"@jsr" = "https://npm.jsr.io"

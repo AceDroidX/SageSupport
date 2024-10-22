@@ -1,0 +1,12 @@
+{
+    "name": "sage-support",
+    "version": "1.0.0",
+    "workspaces": [
+        "packages/*"
+    ],
+    "scripts": {
+        "dev": "bun run --filter '*' dev --host",
+        "dev:server": "bun run --filter sage-support-server dev",
+        "dev:web": "bun run --filter sage-support-web dev --host"
+    }
+}

@@ -1,0 +1,7 @@
+{
+    // This is an alias to @tsconfig/node16: https://github.com/tsconfig/bases
+    "extends": "@tsconfig/bun/tsconfig.json",
+    "compilerOptions": {
+        // typescript options here
+    }
+}

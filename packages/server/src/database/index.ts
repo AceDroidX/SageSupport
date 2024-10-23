@@ -2,13 +2,13 @@ import { PrismaClient } from '../../generated/client/index.js'
 
 export const prisma = new PrismaClient()
 
-export async function db_document_create(uuid: string, name: string, textSplitsId: string[]) {
+export async function db_document_create(uuid: string, name: string, textSplitsId: string[], graph: string) {
     return await prisma.document.create({
         data: {
             uuid,
             name,
             textSplitsId,
-            graph: '',
+            graph,
         }
     })
 }

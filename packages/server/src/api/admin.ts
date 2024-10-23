@@ -3,9 +3,9 @@ import { db_document_create, db_document_delete, db_document_list } from "../dat
 import { llm_insertPDF, llm_streamInput } from "../llm";
 import type { ChatRequest } from "../model";
 import { document_uuid_list } from "../service";
+import { generateAlphabetUUID } from "../utils";
 import { vdb_deleteCollection } from "../weaviate";
 import { verifyAdmin, verifySession } from "./middleware";
-import { generateAlphabetUUID } from "../utils";
 
 export function add_router_admin(router: Router) {
     router.get('/admin/documents', verifySession, verifyAdmin, async (ctx) => {
@@ -25,9 +25,10 @@ export function add_router_admin(router: Router) {
             }
             // TODO: 添加多文件支持
             const uuid = generateAlphabetUUID()
-            let textSplitsId = []
+            let textSplitsId: string[] = []
+            let graph = ''
             try {
-                textSplitsId = await llm_insertPDF(files[0], uuid)
+                ({ textSplitsId, graph } = await llm_insertPDF(files[0], uuid));
             } catch (e) {
                 console.error(e)
                 ctx.response.status = 400
@@ -41,7 +42,7 @@ export function add_router_admin(router: Router) {
             }
             const name = files[0].name
             try {
-                await db_document_create(uuid, name, textSplitsId)
+                await db_document_create(uuid, name, textSplitsId, graph)
             } catch (e) {
                 console.error(e)
                 try {

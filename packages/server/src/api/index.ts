@@ -1,5 +1,4 @@
 import { Application, Router } from "@oak/oak";
-import { natsGraphragVisualize } from "../nats";
 import { add_router_admin } from "./admin";
 import { add_router_auth } from "./auth";
 import { add_router_debug } from "./debug";
@@ -34,9 +33,9 @@ function add_router(router: Router) {
         ctx.response.body = 'Hello World!';
     });
 
-    router.get('/visualize', async (ctx, next) => {
-        ctx.response.body = await natsGraphragVisualize()
-    })
+    // router.get('/visualize', async (ctx, next) => {
+    //     ctx.response.body = await natsGraphragVisualize()
+    // })
 
     add_router_auth(router)
     add_router_user(router)

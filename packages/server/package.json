@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "bun run src/test.ts",
-    "dev": "bun run --hot src/index.ts",
+    "dev": "bun run --watch src/index.ts",
     "prisma:generate": "bun run prisma generate",
     "prisma:push": "bun run prisma db push"
   },

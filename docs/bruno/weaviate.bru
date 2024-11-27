@@ -1,0 +1,21 @@
+meta {
+  name: weaviate
+  type: graphql
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/v1/graphql
+  body: graphql
+  auth: none
+}
+
+body:graphql {
+  {
+    Get{
+      Langchainjs_test{
+        
+      }
+    }
+  }
+}

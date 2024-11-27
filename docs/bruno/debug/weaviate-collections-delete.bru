@@ -1,0 +1,15 @@
+meta {
+  name: weaviate-collections-delete
+  type: http
+  seq: 2
+}
+
+delete {
+  url: {{base}}/debug/weaviate/collections/:name
+  body: none
+  auth: none
+}
+
+params:path {
+  name: Langchainjs_test
+}

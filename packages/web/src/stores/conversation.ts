@@ -44,21 +44,25 @@ export const useConversationStore = defineStore('conversation', () => {
     const ws = new WebSocket(import.meta.env.VITE_API_BASE_URL + '/user/websocket')
     ws.onmessage = (ev) => {
       console.log(ev)
+      function addMessage(data: Message) {
+        const original = conversationDict.value.get(data.conversationId)
+        if (original) {
+          conversationDict.value.set(data.conversationId, original.concat(data))
+        } else {
+          conversationDict.value.set(data.conversationId, [data])
+        }
+      }
       const data: WebSocketResponseEvent = JSON.parse(ev.data)
       if (data.type == 'message') {
-        const original = conversationDict.value.get(data.data.conversationId)
-        if (original) {
-          conversationDict.value.set(data.data.conversationId, original.concat(data.data))
-        } else {
-          conversationDict.value.set(data.data.conversationId, [data.data])
-        }
+        addMessage(data.data)
       } else if (data.type == 'start') {
         deltaDict.value.set(data.conversationId, '')
       } else if (data.type == 'delta') {
         const delta = deltaDict.value.get(data.conversationId)
         deltaDict.value.set(data.conversationId, (delta ?? '') + (data.content ?? ''))
       } else if (data.type == 'end') {
-        deltaDict.value.delete(data.conversationId)
+        deltaDict.value.delete(data.data.conversationId)
+        addMessage(data.data)
       }
     }
   })

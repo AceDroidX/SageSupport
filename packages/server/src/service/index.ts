@@ -55,8 +55,6 @@ export async function service_post_user_msg(uid: number, conversationId: number,
         ws.send(JSON.stringify(data))
     }
     const db_msg = await db_message_create(conversationId, answer, MessageType.AI)
-    const endData: WebSocketResponseEvent = { type: 'end', conversationId }
+    const endData: WebSocketResponseEvent = { type: 'end', data: db_msg }
     ws.send(JSON.stringify(endData))
-    const msgData: WebSocketResponseEvent = { type: 'message', data: db_msg }
-    ws.send(JSON.stringify(msgData))
 }

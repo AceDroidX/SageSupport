@@ -12,7 +12,7 @@ export type WebSocketResponseEvent = {
     content?: string
 } | {
     type: 'end'
-    conversationId: number
+    data: Message
 }
 
 export type ConversationWithMessages = Conversation & {

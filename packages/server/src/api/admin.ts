@@ -1,27 +1,23 @@
-import { ServerSentEvent, type Router } from "@oak/oak";
-import type { ChatRequest } from "sage-support-shared";
+import { Hono } from "hono";
 import { db_document_create, db_document_delete, db_document_list } from "../database";
-import { llm_insertPDF, llm_streamInput } from "../llm";
-import { document_uuid_list } from "../service";
+import { llm_insertPDF } from "../llm";
 import { generateAlphabetUUID } from "../utils";
 import { vdb_deleteCollection } from "../weaviate";
 import { verifyAdmin, verifySession } from "./middleware";
 
-export function add_router_admin(router: Router) {
-    router.get('/admin/documents', verifySession, verifyAdmin, async (ctx) => {
-        ctx.response.body = await db_document_list()
+export function add_router_admin(app: Hono) {
+    app.get('/admin/documents', verifySession, verifyAdmin, async (ctx) => {
+        return ctx.json(await db_document_list())
     });
-    router.post('/admin/documents', verifySession, verifyAdmin, async (ctx) => {
-        const data = (await ctx.request.body.formData()).getAll('documents[]')
+    app.post('/admin/documents', verifySession, verifyAdmin, async (ctx) => {
+        const data = (await ctx.req.formData()).getAll('documents[]')
         console.debug('收到文件')
         console.debug(data)
         try {
             // type FormDataEntryValue = File | string;
             const files = data.filter(item => typeof item != 'string')
             if (files.length == 0) {
-                ctx.response.status = 400
-                ctx.response.body = { code: 1, msg: '文件为空' }
-                return
+                return ctx.json({ code: 1, msg: '文件为空' }, 400)
             }
             // TODO: 添加多文件支持
             const uuid = generateAlphabetUUID()
@@ -31,14 +27,10 @@ export function add_router_admin(router: Router) {
                 ({ textSplitsId, graph } = await llm_insertPDF(files[0], uuid));
             } catch (e) {
                 console.error(e)
-                ctx.response.status = 400
-                ctx.response.body = { code: 1, msg: '上传失败 Langchain错误:' + JSON.stringify(e) }
-                return
+                return ctx.json({ code: 1, msg: '上传失败 Langchain错误:' + JSON.stringify(e) }, 400)
             }
             if (textSplitsId.length == 0) {
-                ctx.response.status = 400
-                ctx.response.body = { code: 1, msg: '上传失败 textSplitsId.length == 0' }
-                return
+                return ctx.json({ code: 1, msg: '上传失败 textSplitsId.length == 0' }, 400)
             }
             const name = files[0].name
             try {
@@ -49,42 +41,36 @@ export function add_router_admin(router: Router) {
                     await vdb_deleteCollection(uuid)
                 } catch (err) {
                     console.error(err)
-                    ctx.response.status = 400
-                    ctx.response.body = { code: 1, msg: '上传失败 数据库错误 + vdb_deleteCollection错误:' + JSON.stringify(e) + '\n' + JSON.stringify(err) }
-                    return
+                    return ctx.json({ code: 1, msg: '上传失败 数据库错误 + vdb_deleteCollection错误:' + JSON.stringify(e) + '\n' + JSON.stringify(err) }, 400)
                 }
-                ctx.response.status = 400
-                ctx.response.body = { code: 1, msg: '上传失败 数据库错误:' + JSON.stringify(e) }
-                return
+                return ctx.json({ code: 1, msg: '上传失败 数据库错误:' + JSON.stringify(e) }, 400)
             }
-            ctx.response.body = { code: 0, msg: '上传成功', data: { uuid, name, textSplitsId } }
+            return ctx.json({ code: 0, msg: '上传成功', data: { uuid, name, textSplitsId } })
         } catch (e) {
             console.error(e)
-            ctx.response.status = 400
-            ctx.response.body = { code: 1, msg: '未知错误' }
+            return ctx.json({ code: 1, msg: '未知错误' }, 400)
         }
     });
-    router.delete('/admin/documents/:uuid', verifySession, verifyAdmin, async (ctx) => {
+    app.delete('/admin/documents/:uuid', verifySession, verifyAdmin, async (ctx) => {
         try {
-            await vdb_deleteCollection(ctx.params.uuid)
-            await db_document_delete(ctx.params.uuid)
-            ctx.response.body = { code: 0, msg: '删除成功' }
+            await vdb_deleteCollection(ctx.req.param('uuid'))
+            await db_document_delete(ctx.req.param('uuid'))
+            return ctx.json({ code: 0, msg: '删除成功' })
         } catch (e) {
             console.error(e)
-            ctx.response.status = 400
-            ctx.response.body = { code: 1, msg: JSON.stringify(e) }
+            return ctx.json({ code: 1, msg: JSON.stringify(e) }, 400)
         }
     })
-    router.post('/admin/chat', verifySession, verifyAdmin, async (ctx) => {
-        const data = <ChatRequest>await ctx.request.body.json()
-        // https://oakserver.github.io/oak/sse.html
-        const target = await ctx.sendEvents({ keepAlive: 5000 })
-        for await (const chunk of await llm_streamInput(data.msg, await document_uuid_list())) {
-            if (chunk.answer) console.write(chunk.answer)
-            else console.debug(chunk)
-            target.dispatchEvent(new ServerSentEvent("delta", { data: chunk }))
-        }
-        await target.close()
-        console.debug('chat发送完成')
-    });
+    // app.post('/admin/chat', verifySession, verifyAdmin, async (ctx) => {
+    //     const data = await ctx.req.json<ChatRequest>()
+    //     // https://oakserver.github.io/oak/sse.html
+    //     const target = await ctx.sendEvents({ keepAlive: 5000 })
+    //     for await (const chunk of await llm_streamInput(data.msg, await document_uuid_list())) {
+    //         if (chunk.answer) console.write(chunk.answer)
+    //         else console.debug(chunk)
+    //         target.dispatchEvent(new ServerSentEvent("delta", { data: chunk }))
+    //     }
+    //     await target.close()
+    //     console.debug('chat发送完成')
+    // });
 }

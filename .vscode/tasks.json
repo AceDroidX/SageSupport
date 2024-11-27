@@ -30,7 +30,7 @@
             "label": "server",
             // The task will launch a shell
             "type": "shell",
-            "command": "bun run dev --host",
+            "command": "bun run dev",
             // Set the shell type
             "options": {
                 "cwd": "${workspaceFolder}/packages/server"

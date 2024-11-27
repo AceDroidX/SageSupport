@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "bun run src/test.ts",
-    "dev": "bun run src/index.ts --hot",
+    "dev": "bun run --hot src/index.ts",
     "prisma:generate": "bun run prisma generate",
     "prisma:push": "bun run prisma db push"
   },
@@ -15,16 +15,18 @@
     "@langchain/ollama": "^0.1.0",
     "@langchain/openai": "^0.3.11",
     "@langchain/weaviate": "^0.1.0",
-    "@oak/oak": "npm:@jsr/oak__oak",
     "@std/encoding": "npm:@jsr/std__encoding",
     "axios": "^1.6.8",
+    "hono": "^4.6.12",
     "langfuse-langchain": "^3.27.0",
     "nats": "^2.28.2",
     "pdf-parse": "^1.1.1",
+    "sage-support-shared": "workspace:shared",
     "sharp": "^0.33.4",
     "weaviate-client": "^3.1.5",
     "weaviate-ts-client": "^2.2.0",
-    "sage-support-shared": "workspace:shared"
+    "@prisma/client": "^5.22.0",
+    "prisma": "^5.22.0"
   },
   "devDependencies": {
     "@tsconfig/bun": "^1.0.7",

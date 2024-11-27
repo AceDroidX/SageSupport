@@ -1,13 +1,24 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView
+      name: 'user',
+      component: () => import('../views/UserView.vue'),
+      children: [
+        {
+          path: '',
+          name: 'home',
+          component: () => import('../views/HomeView.vue')
+        },
+        {
+          path: '/conversation/:id',
+          component: () => import('../views/ConversationView.vue'),
+          props: true
+        }
+      ]
     },
     {
       path: '/login',

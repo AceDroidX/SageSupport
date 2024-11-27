@@ -1,13 +1,13 @@
-import type { Router } from "@oak/oak";
+import { Hono } from "hono";
 import { vdb_deleteCollection, vdb_listAllCollections } from "../weaviate";
 import { verifyAdmin, verifySession } from "./middleware";
 
-export function add_router_debug(router: Router) {
-    router.get('/debug/weaviate/collections', verifySession, verifyAdmin, async (ctx) => {
-        ctx.response.body = (await vdb_listAllCollections()).map(item => item.name)
+export function add_router_debug(app: Hono) {
+    app.get('/debug/weaviate/collections', verifySession, verifyAdmin, async (ctx) => {
+        return ctx.json((await vdb_listAllCollections()).map(item => item.name))
     });
-    router.delete('/debug/weaviate/collections/:name', verifySession, verifyAdmin, async (ctx) => {
-        await vdb_deleteCollection(ctx.params.name)
-        ctx.response.body = { code: 0, msg: '删除成功' }
+    app.delete('/debug/weaviate/collections/:name', verifySession, verifyAdmin, async (ctx) => {
+        await vdb_deleteCollection(ctx.req.param('name'))
+        return ctx.json({ code: 0, msg: '删除成功' })
     });
 }

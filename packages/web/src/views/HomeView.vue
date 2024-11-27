@@ -1,11 +1,30 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router';
+import { useConversationStore } from "@/stores/conversation";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+
+const conversation = useConversationStore();
+const router = useRouter();
+
+const question = ref("");
+
+async function send() {
+    const resp = await conversation.newMessage(question.value);
+    router.push("/conversation/" + resp.data.id);
+}
 </script>
 
 <template>
-  <main>
-    <RouterLink to="/admin">
-      <button class="btn btn-primary">跳转到测试页面</button>
-    </RouterLink>
-  </main>
+    <div class="flex flex-col gap-4 w-full h-full justify-center items-center">
+        <h1 class="text-xl font-bold">您遇到了什么问题？</h1>
+        <label class="flex gap-2">
+            <input
+                v-model="question"
+                type="text"
+                placeholder="输入您的问题"
+                class="input input-bordered w-full max-w-xs"
+            />
+            <button @click="send" class="btn btn-primary">发送</button>
+        </label>
+    </div>
 </template>

@@ -1,4 +1,4 @@
-import type { Conversation, Message } from "./generated/client"
+import type { Conversation, Message } from "./prisma"
 
 export type WebSocketResponseEvent = {
     type: 'message'
@@ -9,7 +9,7 @@ export type WebSocketResponseEvent = {
 } | {
     type: 'delta'
     conversationId: number
-    content: string
+    content?: string
 } | {
     type: 'end'
     conversationId: number
@@ -22,3 +22,4 @@ export type ConversationWithMessages = Conversation & {
 export type ChatRequest = {
     msg: string
 }
+

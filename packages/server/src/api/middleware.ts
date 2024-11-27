@@ -1,29 +1,30 @@
-import type { Context, Next } from "@oak/oak"
-import { type User, UserRole } from "sage-support-shared/generated/client"
+import { createMiddleware } from 'hono/factory'
+import { type User } from "../../generated/client"
 import { db_userinfo_by_session } from "../database/auth.ts"
 
-export async function verifySession(ctx: Context<{ user: User }>, next: Next) {
-    const session = ctx.request.headers.get('Cookie')?.match(/session=([^;]+)/)?.[1]
+export const verifySession = createMiddleware<{ Variables: { user: User } }>(async (ctx, next) => {
+    const session = ctx.req.header('Cookie')?.match(/session=([^;]+)/)?.[1]
     if (!session) {
-        ctx.response.status = 401
-        ctx.response.body = { code: 401, msg: '未登录' }
-        return
+        return ctx.json({ code: 401, msg: '未登录' }, 401)
     }
     const dbResp = await db_userinfo_by_session(session)
     if (!dbResp) {
-        ctx.response.status = 401
-        ctx.response.body = { code: 401, msg: '未登录' }
-        return
+        return ctx.json({ code: 401, msg: '未登录' }, 401)
     }
-    ctx.state.user = dbResp.user
+    ctx.set('user', dbResp.user)
     return next()
-}
+})
 
-export async function verifyAdmin(ctx: Context<{ user: User }>, next: Next) {
-    if (ctx.state.user.role != 'ADMIN') {
-        ctx.response.status = 401
-        ctx.response.body = { code: 401, msg: '权限不足' }
-        return
+export const verifyUser = createMiddleware<{ Variables: { user: User } }>(async (ctx, next) => {
+    if (ctx.get('user').role != 'USER') {
+        return ctx.json({ code: 401, msg: '权限不足' }, 401)
     }
     return next()
-}
+})
+
+export const verifyAdmin = createMiddleware<{ Variables: { user: User } }>(async (ctx, next) => {
+    if (ctx.get('user').role != 'ADMIN') {
+        return ctx.json({ code: 401, msg: '权限不足' }, 401)
+    }
+    return next()
+})

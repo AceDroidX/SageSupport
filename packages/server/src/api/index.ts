@@ -1,44 +1,58 @@
-import { Application, Router } from "@oak/oak";
+import type { ServerWebSocket } from "bun";
+import { Hono } from "hono";
+import { createBunWebSocket } from "hono/bun";
+import { cors } from 'hono/cors';
+import { logger } from 'hono/logger';
 import { add_router_admin } from "./admin";
 import { add_router_auth } from "./auth";
 import { add_router_debug } from "./debug";
 import { add_router_user } from "./user";
 
+const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>()
+
 export function init_api() {
-    const app = new Application();
-    const router = new Router();
+    const app = new Hono();
+    app.use(logger())
+    app.use('*', cors({
+        origin: (origin) => origin,
+        credentials: true
+    }))
 
-    add_router(router)
+    add_router(app)
 
-    app.use((ctx, next) => {
-        ctx.response.headers.set('Access-Control-Allow-Origin', ctx.request.headers.get('Origin') || '*')
-        ctx.response.headers.set('Access-Control-Allow-Credentials', 'true')
-        ctx.response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, X-Requested-With, Accept')
-        ctx.response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-        return next()
-    })
-
-    app
-        .use(router.routes())
-        .use(router.allowedMethods())
-
-    app.listen({ hostname: "0.0.0.0", port: 3000 });
-
-    console.log("Listening on 0.0.0.0:3000")
-}
-
-function add_router(router: Router) {
-    router.get('/', (ctx, next) => {
-        // ctx.router available
-        ctx.response.body = 'Hello World!';
-    });
-
-    // router.get('/visualize', async (ctx, next) => {
-    //     ctx.response.body = await natsGraphragVisualize()
+    // app.use((ctx, next) => {
+    //     ctx.response.headers.set('Access-Control-Allow-Origin', ctx.request.headers.get('Origin') || '*')
+    //     ctx.response.headers.set('Access-Control-Allow-Credentials', 'true')
+    //     ctx.response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, X-Requested-With, Accept')
+    //     ctx.response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    //     return next()
     // })
 
-    add_router_auth(router)
-    add_router_user(router)
-    add_router_admin(router)
-    add_router_debug(router)
+    // app
+    //     .use(app.routes())
+    //     .use(app.allowedMethods())
+
+    // app.listen({ hostname: "0.0.0.0", port: 3000 });
+
+    return {
+        port: 3000,
+        fetch: app.fetch,
+        websocket,
+    }
+}
+
+function add_router(app: Hono) {
+    app.get('/', (c) => {
+        // ctx.router available
+        return c.text('Hello World!');
+    });
+
+    // app.get('/visualize', async (ctx, next) => {
+    //     return ctx.json(await natsGraphragVisualize()
+    // })
+
+    add_router_auth(app)
+    add_router_user(app, upgradeWebSocket)
+    add_router_admin(app)
+    add_router_debug(app)
 }

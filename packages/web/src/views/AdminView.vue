@@ -22,7 +22,7 @@ async function uploadDocuments() {
     const resp = await axiosInstance.postForm('/admin/documents', {
         documents: fileElement.value?.files
     })
-    if (fileElement.value) fileElement.value.files = null
+    if (fileElement.value) fileElement.value.value = ''
     await getDocuments()
 }
 

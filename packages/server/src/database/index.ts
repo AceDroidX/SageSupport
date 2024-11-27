@@ -76,6 +76,14 @@ export async function db_conversation_by_id(id: number) {
     })
 }
 
+export async function db_conversation_delete(id: number) {
+    return await prisma.conversation.delete({
+        where: {
+            id
+        }
+    })
+}
+
 export async function db_message_create(conversationId: number, content: string, type: MessageType) {
     return await prisma.message.create({
         data: {

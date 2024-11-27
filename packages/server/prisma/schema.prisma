@@ -67,7 +67,7 @@ model Message {
   content        String
   type           MessageType
   createdAt      DateTime     @default(now())
-  Conversation   Conversation @relation(fields: [conversationId], references: [id])
+  Conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   conversationId Int
 }
 

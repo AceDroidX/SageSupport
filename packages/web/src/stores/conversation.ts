@@ -40,6 +40,11 @@ export const useConversationStore = defineStore('conversation', () => {
     await axiosInstance.post('/user/conversation/' + id, { msg })
   }
 
+  async function deleteConversation(id: number) {
+    const resp = await axiosInstance.delete<Conversation[]>('/user/conversation/' + id)
+    conversationList.value = resp.data
+  }
+
   onMounted(() => {
     connect()
     function connect() {
@@ -80,5 +85,5 @@ export const useConversationStore = defineStore('conversation', () => {
     ws?.close()
   })
 
-  return { conversationList, useMessage, fetchConversation, fetchConversationList, newMessage, sendMessage }
+  return { conversationList, useMessage, fetchConversation, fetchConversationList, deleteConversation, newMessage, sendMessage }
 })

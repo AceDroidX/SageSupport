@@ -32,7 +32,7 @@ export const useConversationStore = defineStore('conversation', () => {
 
   async function newMessage(msg: string) {
     const resp = await axiosInstance.post<Conversation>('/user/conversation', { msg })
-    conversationList.value.push(resp.data)
+    conversationList.value.splice(0, 0, resp.data)
     return resp
   }
 

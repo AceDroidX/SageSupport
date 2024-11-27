@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../generated/client/index.js'
+import { MessageType, PrismaClient } from "sage-support-shared/generated/client"
 
 export const prisma = new PrismaClient()
 

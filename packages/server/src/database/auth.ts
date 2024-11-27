@@ -1,5 +1,5 @@
+import type { UserRole } from "sage-support-shared/generated/client"
 import { prisma } from "."
-import type { UserRole } from "../../generated/client"
 
 export async function db_user_auth_by_username(username: string) {
     const result = await prisma.user.findUnique({

@@ -1,6 +1,6 @@
 import type { Context, Next } from "@oak/oak"
-import type { User } from "../../generated/client"
-import { db_userinfo_by_session } from "../database/auth"
+import { type User, UserRole } from "sage-support-shared/generated/client"
+import { db_userinfo_by_session } from "../database/auth.ts"
 
 export async function verifySession(ctx: Context<{ user: User }>, next: Next) {
     const session = ctx.request.headers.get('Cookie')?.match(/session=([^;]+)/)?.[1]

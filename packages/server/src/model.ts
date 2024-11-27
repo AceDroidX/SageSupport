@@ -17,7 +17,3 @@ export enum NatsSubject {
     GraphragCmd = "graphrag.cmd",
     GraphragVisualize = "graphrag.visualize",
 }
-
-export type ChatRequest = {
-    msg: string
-}

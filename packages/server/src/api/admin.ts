@@ -1,7 +1,7 @@
 import { ServerSentEvent, type Router } from "@oak/oak";
+import type { ChatRequest } from "sage-support-shared";
 import { db_document_create, db_document_delete, db_document_list } from "../database";
 import { llm_insertPDF, llm_streamInput } from "../llm";
-import type { ChatRequest } from "../model";
 import { document_uuid_list } from "../service";
 import { generateAlphabetUUID } from "../utils";
 import { vdb_deleteCollection } from "../weaviate";

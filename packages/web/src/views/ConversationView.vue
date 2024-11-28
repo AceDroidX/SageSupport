@@ -1,29 +1,43 @@
 <script setup lang="ts">
 import ChatList from "@/components/ChatList.vue";
 import { useConversationStore } from "@/stores/conversation";
-import { nextTick, watch } from "vue";
+import { nextTick, ref, watch } from "vue";
 
 const props = defineProps<{ id: string }>();
 
 const conversation = useConversationStore();
 
+const message = ref("");
+
 watch(
-    () => props.id,
-    async () => {
-        await nextTick();
-        conversation.fetchConversation(Number(props.id));
-    },
-    { immediate: true }
+  () => props.id,
+  async () => {
+    await nextTick();
+    conversation.fetchConversation(Number(props.id));
+  },
+  { immediate: true },
 );
 </script>
 
 <template>
-    <div class="flex flex-col gap-4 w-full h-full justify-center items-center">
-        <h1 class="text-xl font-bold">会话 {{ id }}</h1>
+  <div class="flex h-full w-full flex-col items-center justify-center gap-4">
+    <h1 class="text-xl font-bold">会话 {{ id }}</h1>
 
-        <ChatList
-            :data="conversation.useMessage(Number(id)).value"
-            role="USER"
-        />
+    <ChatList :data="conversation.useMessage(Number(id)).value" role="USER" />
+
+    <div class="flex gap-2">
+      <input
+        v-model="message"
+        @keyup.enter="conversation.sendMessage(Number(id), message)"
+        type="text"
+        class="input input-bordered"
+      />
+      <button
+        @click="conversation.sendMessage(Number(id), message)"
+        class="btn btn-primary"
+      >
+        发送
+      </button>
     </div>
+  </div>
 </template>

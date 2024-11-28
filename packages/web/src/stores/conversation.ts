@@ -37,6 +37,7 @@ export const useConversationStore = defineStore('conversation', () => {
   }
 
   async function sendMessage(id: number, msg: string) {
+    conversationDict.value.set(id, [...(conversationDict.value.get(id) ?? []), { messageId: 0, content: msg, type: MessageType.USER, createdAt: new Date(), conversationId: id, }])
     await axiosInstance.post('/user/conversation/' + id, { msg })
   }
 

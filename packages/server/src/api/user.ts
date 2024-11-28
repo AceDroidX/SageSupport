@@ -40,7 +40,7 @@ export function add_router_user(app: Hono, upgradeWebSocket: UpgradeWebSocket) {
     app.post('/user/conversation/:id', verifySession, verifyUser, async (ctx) => {
         const data = await ctx.req.json<ChatRequest>()
         service_post_user_msg(ctx.get('user').id, Number(ctx.req.param('id')), data.msg, websocketPool)
-        return ctx.status(204)
+        return ctx.body(null, 204)
     });
     app.delete('/user/conversation/:id', verifySession, verifyUser, async (ctx) => {
         await db_conversation_delete(Number(ctx.req.param('id')))

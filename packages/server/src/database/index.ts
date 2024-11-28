@@ -93,3 +93,11 @@ export async function db_message_create(conversationId: number, content: string,
         }
     })
 }
+
+export async function db_message_list(conversationId: number) {
+    return await prisma.message.findMany({
+        where: {
+            conversationId
+        }
+    })
+}

@@ -1,11 +1,13 @@
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { Document } from "@langchain/core/documents";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
+import type { BaseMessage } from "@langchain/core/messages";
+import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
 import { ChatOllama, OllamaEmbeddings } from "@langchain/ollama";
 import { ChatOpenAI } from "@langchain/openai";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { WeaviateStore } from "@langchain/weaviate";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
+import { createHistoryAwareRetriever } from "langchain/chains/history_aware_retriever";
 import { createRetrievalChain } from "langchain/chains/retrieval";
 import { EnsembleRetriever } from "langchain/retrievers/ensemble";
 import { CallbackHandler } from "langfuse-langchain";
@@ -62,6 +64,22 @@ const OPENAI_MODEL = import.meta.env["OPENAI_MODEL"]
 const llm = OPENAI_MODEL ? new ChatOpenAI({
     model: OPENAI_MODEL,
 }) : new ChatOllama({ model: 'qwen2.5:7b' })
+
+// Contextualize question
+const contextualizeQSystemPrompt =
+    "Given a chat history and the latest user question " +
+    "which might reference context in the chat history, " +
+    "formulate a standalone question which can be understood " +
+    "without the chat history. Do NOT answer the question, " +
+    "just reformulate it if needed and otherwise return it as is.";
+
+const contextualizeQPrompt = ChatPromptTemplate.fromMessages([
+    ["system", contextualizeQSystemPrompt],
+    new MessagesPlaceholder("chat_history"),
+    ["human", "{input}"],
+]);
+
+// Answer question
 const systemTemplate = [
     `You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise.`,
     `\n\n`,
@@ -70,6 +88,7 @@ const systemTemplate = [
 ].join("");
 const prompt = ChatPromptTemplate.fromMessages([
     ["system", systemTemplate],
+    new MessagesPlaceholder("chat_history"),
     ["human", "{input}"],
 ]);
 const questionAnswerChain = await createStuffDocumentsChain({ llm, prompt });
@@ -83,8 +102,13 @@ async function getRagChain(indexNames: string[]) {
             weights: Array(indexNames.length).fill(1 / indexNames.length),
         })
     }
-    return await createRetrievalChain({
+    const historyAwareRetriever = await createHistoryAwareRetriever({
+        llm,
         retriever: retriever(),
+        rephrasePrompt: contextualizeQPrompt,
+    });
+    return await createRetrievalChain({
+        retriever: historyAwareRetriever,
         combineDocsChain: questionAnswerChain,
     });
 }
@@ -114,9 +138,10 @@ async function insertDocument(docs: Document<Record<string, any>>[], documentUui
     return await getVectorStore(documentUuid).addDocuments(splits);
 }
 
-export async function llm_streamInput(input: string, documentUuids: string[]) {
+export async function llm_streamInput(input: string, documentUuids: string[], chat_history?: BaseMessage[]) {
     const results = await (await getRagChain(documentUuids)).stream({
         input,
+        chat_history,
     }, { callbacks: [langfuseHandler] });
     return results
 }

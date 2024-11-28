@@ -1,8 +1,9 @@
+import { AIMessage, HumanMessage, type BaseMessage } from "@langchain/core/messages";
 import type { WSContext } from "hono/ws";
 import type { WebSocketResponseEvent } from "sage-support-shared";
-import { MessageType, type UserRole } from "../../generated/client";
+import { MessageType, type Message, type UserRole } from "../../generated/client";
 import { db_create_session, db_register, db_userinfo_by_username } from "../database/auth.ts";
-import { db_document_list, db_message_create } from "../database/index.ts";
+import { db_document_list, db_message_create, db_message_list } from "../database/index.ts";
 import { llm_streamInput } from "../llm.ts";
 
 export async function init_user() {
@@ -31,6 +32,17 @@ export async function document_uuid_list() {
     return (await db_document_list()).map(item => item.uuid)
 }
 
+function message_db_to_llm(input: Message[]): BaseMessage[] {
+    return input.map(item => {
+        if (item.type == MessageType.AI) return new AIMessage(item.content)
+        else if (item.type == MessageType.USER) return new HumanMessage(item.content)
+        else {
+            console.warn('unknown message type', item)
+            return new HumanMessage(`[${item.type} Message]:${item.content}`)
+        }
+    })
+}
+
 export async function service_post_user_msg(uid: number, conversationId: number, msg: string, websocketPool: Map<number, WSContext>) {
     const ws = websocketPool.get(uid)
     if (!ws) {
@@ -45,7 +57,7 @@ export async function service_post_user_msg(uid: number, conversationId: number,
     const startData: WebSocketResponseEvent = { type: 'start', conversationId }
     ws.send(JSON.stringify(startData))
     let answer = ''
-    for await (const chunk of await llm_streamInput(msg, await document_uuid_list())) {
+    for await (const chunk of await llm_streamInput(msg, await document_uuid_list(), message_db_to_llm(await db_message_list(conversationId)))) {
         if (chunk.answer) {
             answer += chunk.answer
             console.write(chunk.answer)

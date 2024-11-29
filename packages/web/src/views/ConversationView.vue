@@ -44,7 +44,10 @@ watch(
         发送
       </button>
       <button
-        v-if="!conversation.useConversation(Number(id)).value?.supportUserId"
+        v-if="
+          auth.data?.role == 'USER' &&
+          !conversation.useConversation(Number(id)).value?.supportUserId
+        "
         @click="conversation.toSupport(Number(id))"
         class="btn btn-primary"
       >

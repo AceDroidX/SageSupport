@@ -1,8 +1,9 @@
 import { axiosInstance } from '@/utils'
 import { defineStore } from 'pinia'
 import type { ConversationWithMessages, WebSocketResponseEvent } from 'sage-support-shared'
-import { type Conversation, type Message, MessageType } from 'sage-support-shared/prisma'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { type Conversation, type Message, MessageType, UserRole } from 'sage-support-shared/prisma'
+import { computed, ref, watch } from 'vue'
+import { useAuthStore } from './auth'
 
 export const useConversationStore = defineStore('conversation', () => {
   let ws: WebSocket | undefined
@@ -46,45 +47,63 @@ export const useConversationStore = defineStore('conversation', () => {
     conversationList.value = resp.data
   }
 
-  onMounted(() => {
+  const auth = useAuthStore()
+  watch(() => auth.data?.role, () => {
+    console.log('conversation store role changed', auth.data, ws)
+    if (!auth.data) {
+      if (ws?.OPEN) {
+        ws.close()
+        ws = undefined
+      }
+      return
+    }
+    if (auth.data.role == UserRole.ADMIN) {
+      if (ws?.OPEN) {
+        ws.close()
+        ws = undefined
+      }
+      return
+    }
     connect()
-    function connect() {
-      const ws = new WebSocket(import.meta.env.VITE_API_BASE_URL + '/user/websocket')
-      ws.onmessage = (ev) => {
-        console.log(ev)
-        function addMessage(data: Message) {
-          const original = conversationDict.value.get(data.conversationId)
-          if (original) {
-            conversationDict.value.set(data.conversationId, original.concat(data))
-          } else {
-            conversationDict.value.set(data.conversationId, [data])
-          }
-        }
-        const data: WebSocketResponseEvent = JSON.parse(ev.data)
-        if (data.type == 'message') {
-          addMessage(data.data)
-        } else if (data.type == 'start') {
-          deltaDict.value.set(data.conversationId, '')
-        } else if (data.type == 'delta') {
-          const delta = deltaDict.value.get(data.conversationId)
-          deltaDict.value.set(data.conversationId, (delta ?? '') + (data.content ?? ''))
-        } else if (data.type == 'end') {
-          deltaDict.value.delete(data.data.conversationId)
-          addMessage(data.data)
+  }, { immediate: true })
+  function connect() {
+    console.log('conversation store connect')
+    if (ws?.OPEN) {
+      console.warn('conversation store already connect', auth.data, ws)
+      return
+    }
+    ws = new WebSocket(import.meta.env.VITE_API_BASE_URL + '/user/websocket')
+    ws.onmessage = (ev) => {
+      console.log(ev)
+      function addMessage(data: Message) {
+        const original = conversationDict.value.get(data.conversationId)
+        if (original) {
+          conversationDict.value.set(data.conversationId, original.concat(data))
+        } else {
+          conversationDict.value.set(data.conversationId, [data])
         }
       }
-      ws.onerror = (ev) => {
-        console.error(ev)
-        setTimeout(connect, 1000)
-      }
-      ws.onclose = (ev) => {
-        console.error(ev)
+      const data: WebSocketResponseEvent = JSON.parse(ev.data)
+      if (data.type == 'message') {
+        addMessage(data.data)
+      } else if (data.type == 'start') {
+        deltaDict.value.set(data.conversationId, '')
+      } else if (data.type == 'delta') {
+        const delta = deltaDict.value.get(data.conversationId)
+        deltaDict.value.set(data.conversationId, (delta ?? '') + (data.content ?? ''))
+      } else if (data.type == 'end') {
+        deltaDict.value.delete(data.data.conversationId)
+        addMessage(data.data)
       }
     }
-  })
-  onUnmounted(() => {
-    ws?.close()
-  })
+    ws.onerror = (ev) => {
+      console.error(ev)
+      setTimeout(connect, 1000)
+    }
+    ws.onclose = (ev) => {
+      console.log(ev)
+    }
+  }
 
   return { conversationList, useMessage, fetchConversation, fetchConversationList, deleteConversation, newMessage, sendMessage }
 })

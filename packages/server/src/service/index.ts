@@ -59,13 +59,21 @@ export async function service_set_supportuid(conversationId: number): Promise<Co
     //     return undefined
     // }
     const conversation = await db_conversation_set_supportuid(conversationId, randomItem.id)
-    const data: WebSocketResponseEvent = { type: 'new_conversation', data: conversation }
-    const ws = supportWebsocketPool.get(randomItem.id)
-    if (!ws) {
-        console.warn('support not online', randomItem.id)
-        return conversation
+    const message = await db_message_create(conversationId, `已为您转接至人工客服:${randomItem.name}(UID:${randomItem.id})`, MessageType.SYSTEM)
+    const userWS = userWebsocketPool.get(conversation.userId)
+    if (userWS) {
+        const data: WebSocketResponseEvent = { type: 'message', data: message }
+        userWS.send(JSON.stringify(data))
+    } else {
+        console.warn('user not online', conversation.userId)
     }
-    ws.send(JSON.stringify(data))
+    const supportWS = supportWebsocketPool.get(randomItem.id)
+    if (supportWS) {
+        const data: WebSocketResponseEvent = { type: 'new_conversation', data: conversation }
+        supportWS.send(JSON.stringify(data))
+    } else {
+        console.warn('support not online', randomItem.id)
+    }
     return conversation
 }
 

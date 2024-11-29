@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Message, UserRole } from "sage-support-shared/prisma";
+import { UserRole, type Message } from "sage-support-shared/prisma";
 import account from "./icon/account.vue";
 import faceAgent from "./icon/face-agent.vue";
 import robot from "./icon/robot.vue";
@@ -8,34 +8,40 @@ const props = defineProps<{ data: Message[]; role: UserRole }>();
 </script>
 
 <template>
-    <div class="flex flex-col gap-2 w-full h-full">
-        <div
-            v-for="item in props.data"
-            :key="item.messageId"
-            :class="item.type == props.role ? 'chat-end' : 'chat-start'"
-            class="chat"
-        >
-            <div class="chat-image avatar placeholder">
-                <div class="w-10 h-10 rounded-full">
-                    <!-- <img alt="Tailwind CSS chat bubble component"
+  <div class="flex h-full w-full flex-col gap-2">
+    <div v-for="item in props.data" :key="item.messageId">
+      <div
+        v-if="item.type !== 'SYSTEM'"
+        :class="item.type == props.role ? 'chat-end' : 'chat-start'"
+        class="chat"
+      >
+        <div class="avatar placeholder chat-image">
+          <div class="h-10 w-10 rounded-full">
+            <!-- <img alt="Tailwind CSS chat bubble component"
                             src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" /> -->
-                    <div
-                        class="bg-neutral text-neutral-content w-10 h-10 rounded-full flex justify-center"
-                    >
-                        <robot v-if="item.type === 'AI'" />
-                        <faceAgent v-else-if="item.type === 'SUPPORT'" />
-                        <account v-else />
-                    </div>
-                </div>
+            <div
+              class="flex h-10 w-10 justify-center rounded-full bg-neutral text-neutral-content"
+            >
+              <robot v-if="item.type === 'AI'" />
+              <faceAgent v-else-if="item.type === 'SUPPORT'" />
+              <account v-else />
             </div>
-            <!-- <div class="chat-header">
+          </div>
+        </div>
+        <!-- <div class="chat-header">
                     Anakin
                     <time class="text-xs opacity-50">12:46</time>
                 </div> -->
-            <div class="chat-bubble whitespace-pre-wrap">
-                {{ item.content }}
-            </div>
-            <!-- <div class="chat-footer opacity-50">Seen at 12:46</div> -->
+        <div class="chat-bubble whitespace-pre-wrap">
+          {{ item.content }}
         </div>
+      </div>
+      <div v-else class="flex justify-center">
+        <div class="chat-bubble">
+          {{ item.content }}
+        </div>
+      </div>
+      <!-- <div class="chat-footer opacity-50">Seen at 12:46</div> -->
     </div>
+  </div>
 </template>

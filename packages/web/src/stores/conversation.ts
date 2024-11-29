@@ -86,14 +86,14 @@ export const useConversationStore = defineStore('conversation', () => {
   watch(() => auth.data?.role, () => {
     console.log('conversation store role changed', auth.data, ws)
     if (!auth.data) {
-      if (ws?.OPEN) {
+      if (ws?.readyState == WebSocket.OPEN) {
         ws.close()
         ws = undefined
       }
       return
     }
     if (auth.data.role == UserRole.ADMIN) {
-      if (ws?.OPEN) {
+      if (ws?.readyState == WebSocket.OPEN) {
         ws.close()
         ws = undefined
       }
@@ -103,7 +103,7 @@ export const useConversationStore = defineStore('conversation', () => {
   }, { immediate: true })
   function connect() {
     console.log('conversation store connect')
-    if (ws?.OPEN) {
+    if (ws?.readyState == WebSocket.OPEN) {
       console.warn('conversation store already connect', auth.data, ws)
       return
     }

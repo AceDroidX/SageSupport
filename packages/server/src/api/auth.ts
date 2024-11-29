@@ -38,4 +38,10 @@ export function add_router_auth(app: Hono) {
         ctx.res.headers.set('Set-Cookie', `session=${dbResp.token}; Path=/; SameSite=Lax; Expires=${new Date(dbResp.expire).toUTCString()}`)
         return ctx.json({ code: 0, msg: '注册成功', data: dbResp.regInfo })
     });
+
+    app.post('/logout', async (ctx) => {
+        // ctx.router available
+        ctx.res.headers.set('Set-Cookie', 'session=; Path=/; SameSite=Lax; Expires=Thu, 01 Jan 1970 00:00:00 GMT')
+        return ctx.json({ code: 0, msg: '登出成功' })
+    });
 }

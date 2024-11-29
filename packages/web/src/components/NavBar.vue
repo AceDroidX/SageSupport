@@ -1,43 +1,21 @@
 <script setup lang="ts">
-import axios from "axios";
-import { ref } from "vue";
+import { useAuthStore } from "@/stores/auth";
+import { UserRole } from "sage-support-shared/prisma";
 import { useRouter } from "vue-router";
 import ThemeButton from "./ThemeButton.vue";
-const host = import.meta.env.VITE_API_HOST ?? "http://localhost:8080";
 const router = useRouter();
-let username = ref(localStorage.getItem("username"));
-let role = ref(localStorage.getItem("role"));
-function logout() {
-    axios
-        .get(host + "/user/logout", { withCredentials: true })
-        .then((response) => {
-            console.log(response);
-            if (response.data.code == 0) {
-                localStorage.removeItem("username");
-                localStorage.removeItem("role");
-                username.value = null;
-                role.value = null;
-                alert("退出成功");
-            } else {
-                alert("退出失败：" + response.data.msg);
-            }
-        })
-        .catch((error) => {
-            alert("退出失败：内部错误");
-            console.error(error);
-        });
-}
+const auth = useAuthStore();
 </script>
 
 <template>
-    <div class="navbar bg-base-100 shadow">
-        <div class="flex-1">
-            <!-- <router-link class="btn btn-ghost text-xl" to="/"
+  <div class="navbar bg-base-100 shadow">
+    <div class="flex-1">
+      <!-- <router-link class="btn btn-ghost text-xl" to="/"
         >旅游景点购票系统</router-link
       > -->
-        </div>
-        <div class="flex-none">
-            <!-- <div class="dropdown dropdown-end">
+    </div>
+    <div class="flex-none">
+      <!-- <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-circle btn-ghost">
           <div class="indicator">
             <svg
@@ -70,8 +48,8 @@ function logout() {
           </div>
         </div>
       </div> -->
-            <div v-if="username" class="dropdown dropdown-end">
-                <!-- <div tabindex="0" role="button" class="avatar btn btn-circle btn-ghost">
+      <div v-if="auth.data?.name" class="dropdown dropdown-end">
+        <!-- <div tabindex="0" role="button" class="avatar btn btn-circle btn-ghost">
           <div class="w-10 rounded-full">
             <img
               alt="Tailwind CSS Navbar component"
@@ -79,35 +57,45 @@ function logout() {
             />
           </div>
         </div> -->
-                <div tabindex="0" role="button" class="avatar btn btn-ghost">
-                    {{ role == "Admin" ? "管理员" : "用户" }}：{{ username }}
-                </div>
-                <ul
-                    tabindex="0"
-                    class="menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow"
-                >
-                    <li v-if="role == 'Admin'">
-                        <router-link to="/manage">管理后台</router-link>
-                    </li>
-                    <li><a href="/purchase">历史订单</a></li>
-                    <li><a @click="logout()">登出</a></li>
-                </ul>
-            </div>
-            <button
-                v-if="!username"
-                class="btn btn-ghost"
-                @click="router.push('/login')"
-            >
-                登录
-            </button>
-            <button
-                v-if="!username"
-                class="btn btn-ghost"
-                @click="router.push('/register')"
-            >
-                注册
-            </button>
-            <ThemeButton />
+        <div tabindex="0" role="button" class="avatar btn btn-ghost">
+          {{ auth.data?.role == UserRole.ADMIN ? "管理员" : "用户" }}：{{
+            auth.data?.name
+          }}
         </div>
+        <ul
+          tabindex="0"
+          class="menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow"
+        >
+          <li v-if="auth.data?.role == UserRole.ADMIN">
+            <router-link to="/manage">管理后台</router-link>
+          </li>
+          <!-- <li><a href="/purchase">历史订单</a></li> -->
+          <li>
+            <a
+              @click="
+                auth.logout();
+                router.push('/login');
+              "
+              >登出</a
+            >
+          </li>
+        </ul>
+      </div>
+      <button
+        v-if="!auth.data?.name"
+        class="btn btn-ghost"
+        @click="router.push('/login')"
+      >
+        登录
+      </button>
+      <button
+        v-if="!auth.data?.name"
+        class="btn btn-ghost"
+        @click="router.push('/register')"
+      >
+        注册
+      </button>
+      <ThemeButton />
     </div>
+  </div>
 </template>

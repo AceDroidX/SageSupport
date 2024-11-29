@@ -27,3 +27,9 @@ export type Conversation = {
     title: string;
     userId: number;
 }
+
+export type User = {
+    id: number;
+    name: string;
+    role: UserRole;
+}

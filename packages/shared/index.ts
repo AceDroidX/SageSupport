@@ -1,4 +1,4 @@
-import type { Conversation, Message } from "./prisma"
+import type { Conversation, Message, User } from "./prisma"
 
 export type WebSocketResponseEvent = {
     type: 'message'
@@ -23,3 +23,11 @@ export type ChatRequest = {
     msg: string
 }
 
+export type Msg<T> = {
+    code: number;
+    msg: string;
+    data?: T
+}
+
+export type LoginResponse = Msg<User>
+export type LogoutResponse = Msg<undefined>

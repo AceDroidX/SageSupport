@@ -23,6 +23,8 @@ async function login() {
   // localStorage.setItem('role', resp.data.data.role)
   if (resp.role === UserRole.ADMIN) {
     await router.push("/admin");
+  } else if (resp.role === UserRole.SUPPORT) {
+    await router.push("/support");
   } else {
     await router.push("/");
   }

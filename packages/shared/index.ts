@@ -13,6 +13,9 @@ export type WebSocketResponseEvent = {
 } | {
     type: 'end'
     data: Message
+} | {
+    type: 'new_conversation'
+    data: Conversation
 }
 
 export type ConversationWithMessages = Conversation & {

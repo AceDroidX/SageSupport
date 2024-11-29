@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Message, UserRole } from "sage-support-shared/prisma";
 import account from "./icon/account.vue";
+import faceAgent from "./icon/face-agent.vue";
 import robot from "./icon/robot.vue";
 
 const props = defineProps<{ data: Message[]; role: UserRole }>();
@@ -22,6 +23,7 @@ const props = defineProps<{ data: Message[]; role: UserRole }>();
                         class="bg-neutral text-neutral-content w-10 h-10 rounded-full flex justify-center"
                     >
                         <robot v-if="item.type === 'AI'" />
+                        <faceAgent v-else-if="item.type === 'SUPPORT'" />
                         <account v-else />
                     </div>
                 </div>

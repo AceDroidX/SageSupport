@@ -21,6 +21,23 @@ const router = createRouter({
       ]
     },
     {
+      path: '/support',
+      name: 'support',
+      component: () => import('../views/SupportView.vue'),
+      children: [
+        {
+          path: '',
+          name: 'support-home',
+          component: () => import('../views/SupportHomeView.vue')
+        },
+        {
+          path: '/support/conversation/:id',
+          component: () => import('../views/SupportConversationView.vue'),
+          props: true
+        }
+      ]
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('../views/LoginView.vue')

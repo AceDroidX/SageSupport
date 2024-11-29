@@ -43,13 +43,6 @@ watch(
       >
         发送
       </button>
-      <button
-        v-if="!conversation.useConversation(Number(id)).value?.supportUserId"
-        @click="conversation.toSupport(Number(id))"
-        class="btn btn-primary"
-      >
-        转人工
-      </button>
     </div>
   </div>
 </template>

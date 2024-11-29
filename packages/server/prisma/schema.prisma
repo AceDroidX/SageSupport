@@ -32,13 +32,15 @@ model Session {
 }
 
 model User {
-  id           Int            @id @default(autoincrement())
-  name         String         @unique
-  role         UserRole       @default(USER)
-  conversation Conversation[]
+  id                  Int            @id @default(autoincrement())
+  name                String         @unique
+  role                UserRole       @default(USER)
+  Conversation        Conversation[] @relation(name: "User")
+  SupportConversation Conversation[] @relation(name: "SupportUser")
+  Message             Message[]
   // profile Profile?
-  Auth         Auth?
-  Session      Session[]
+  Auth                Auth?
+  Session             Session[]
 }
 
 enum UserRole {
@@ -55,11 +57,13 @@ enum UserRole {
 // }
 
 model Conversation {
-  id      Int       @id @default(autoincrement())
-  title   String
-  message Message[]
-  User    User      @relation(fields: [userId], references: [id])
-  userId  Int
+  id            Int       @id @default(autoincrement())
+  title         String
+  message       Message[]
+  User          User      @relation(name: "User", fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int
+  SupportUser   User?     @relation(name: "SupportUser", fields: [supportUserId], references: [id])
+  supportUserId Int?
 }
 
 model Message {
@@ -69,6 +73,8 @@ model Message {
   createdAt      DateTime     @default(now())
   Conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   conversationId Int
+  User           User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         Int?
 }
 
 enum MessageType {

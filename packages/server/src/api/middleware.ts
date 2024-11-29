@@ -22,6 +22,13 @@ export const verifyUser = createMiddleware<{ Variables: { user: User } }>(async 
     return next()
 })
 
+export const verifySupport = createMiddleware<{ Variables: { user: User } }>(async (ctx, next) => {
+    if (ctx.get('user').role != 'SUPPORT') {
+        return ctx.json({ code: 401, msg: '权限不足' }, 401)
+    }
+    return next()
+})
+
 export const verifyAdmin = createMiddleware<{ Variables: { user: User } }>(async (ctx, next) => {
     if (ctx.get('user').role != 'ADMIN') {
         return ctx.json({ code: 401, msg: '权限不足' }, 401)

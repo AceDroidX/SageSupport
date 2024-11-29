@@ -1,4 +1,4 @@
-import { MessageType, PrismaClient } from "../../generated/client"
+import { MessageType, PrismaClient, UserRole } from "../../generated/client"
 
 export const prisma = new PrismaClient()
 
@@ -65,7 +65,26 @@ export async function db_conversation_by_userid(userId: number) {
     })
 }
 
+export async function db_conversation_by_supportuid(supportUserId: number) {
+    return await prisma.conversation.findMany({
+        where: {
+            supportUserId
+        },
+        orderBy: {
+            id: "desc"
+        }
+    })
+}
+
 export async function db_conversation_by_id(id: number) {
+    return await prisma.conversation.findUnique({
+        where: {
+            id
+        }
+    })
+}
+
+export async function db_conversation_with_msg_by_id(id: number) {
     return await prisma.conversation.findUnique({
         where: {
             id
@@ -84,12 +103,41 @@ export async function db_conversation_delete(id: number) {
     })
 }
 
-export async function db_message_create(conversationId: number, content: string, type: MessageType) {
+export async function db_user_count_support_conversation() {
+    return await prisma.user.findMany({
+        where: {
+            role: UserRole.SUPPORT,
+        },
+        select: {
+            id: true,
+            name: true,
+            _count: {
+                select: {
+                    SupportConversation: true,
+                },
+            },
+        },
+    });
+}
+
+export async function db_conversation_set_supportuid(id: number, supportUserId: number) {
+    return await prisma.conversation.update({
+        where: {
+            id
+        },
+        data: {
+            supportUserId
+        }
+    })
+}
+
+export async function db_message_create(conversationId: number, content: string, type: MessageType, userId?: number) {
     return await prisma.message.create({
         data: {
             conversationId,
             content,
             type,
+            userId,
         }
     })
 }

@@ -6,6 +6,7 @@ import { logger } from 'hono/logger';
 import { add_router_admin } from "./admin";
 import { add_router_auth } from "./auth";
 import { add_router_debug } from "./debug";
+import { add_router_support } from "./support";
 import { add_router_user } from "./user";
 
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>()
@@ -53,6 +54,7 @@ function add_router(app: Hono) {
 
     add_router_auth(app)
     add_router_user(app, upgradeWebSocket)
+    add_router_support(app, upgradeWebSocket)
     add_router_admin(app)
     add_router_debug(app)
 }

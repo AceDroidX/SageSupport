@@ -10,7 +10,7 @@ const question = ref("");
 
 async function send() {
   const resp = await conversation.newMessage(question.value);
-  if (resp) router.push("/conversation/" + resp.data.id);
+  if (resp) router.push("/support/conversation/" + resp.data.id);
 }
 </script>
 

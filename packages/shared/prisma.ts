@@ -20,12 +20,14 @@ export type Message = {
     type: MessageType;
     createdAt: Date;
     conversationId: number;
+    userId: number | null;
 }
 
 export type Conversation = {
     id: number;
     title: string;
     userId: number;
+    supportUserId: number | null;
 }
 
 export type User = {

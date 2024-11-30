@@ -1,3 +1,5 @@
+import type { UserRole } from "../generated/client"
+
 export type Msg<T> = {
     code: number
     msg: string
@@ -16,4 +18,10 @@ export enum NatsCmd {
 export enum NatsSubject {
     GraphragCmd = "graphrag.cmd",
     GraphragVisualize = "graphrag.visualize",
+}
+
+export type AdminUserAddRequest = {
+    username: string;
+    password: string;
+    role: UserRole
 }

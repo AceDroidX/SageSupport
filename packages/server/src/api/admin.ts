@@ -1,6 +1,8 @@
 import { Hono } from "hono";
 import { db_document_create, db_document_delete, db_document_list, db_user_list } from "../database";
 import { llm_insertPDF } from "../llm";
+import type { AdminUserAddRequest } from "../model";
+import { register } from "../service";
 import { generateAlphabetUUID } from "../utils";
 import { vdb_deleteCollection } from "../weaviate";
 import { verifyAdmin, verifySession } from "./middleware";
@@ -62,6 +64,11 @@ export function add_router_admin(app: Hono) {
         }
     })
     app.get('/admin/users', verifySession, verifyAdmin, async (ctx) => {
+        return ctx.json(await db_user_list())
+    })
+    app.post('/admin/users', verifySession, verifyAdmin, async (ctx) => {
+        const data = await ctx.req.json<AdminUserAddRequest>()
+        await register(data.username, data.password, data.role)
         return ctx.json(await db_user_list())
     })
     // app.post('/admin/chat', verifySession, verifyAdmin, async (ctx) => {

@@ -1,4 +1,5 @@
 import { MessageType, PrismaClient, UserRole } from "../../generated/client"
+import { getTimeF } from "../utils"
 
 export const prisma = new PrismaClient()
 
@@ -48,7 +49,7 @@ export async function db_conversation_create(userId: number) {
     return await prisma.conversation.create({
         data: {
             // 默认对话标题为当前时间
-            title: new Date().toString(),
+            title: getTimeF(),
             userId,
         }
     })

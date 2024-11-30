@@ -193,3 +193,32 @@ export class ChineseRecursiveTextSplitter extends RecursiveCharacterTextSplitter
         return finalChunks.map(chunk => chunk.trim()).filter(chunk => chunk !== "");
     }
 }
+
+export function getTimeF(config?: { timestamp?: number, useMilliSeconds: boolean }) {
+    let timestamp = config?.timestamp
+    let useMilliSeconds = config?.useMilliSeconds
+    let date
+    if (timestamp === undefined) {
+        date = new Date()
+    } else {
+        if (timestamp.toString().length === 10) {
+            timestamp = timestamp * 1000
+            useMilliSeconds = false
+        }
+        date = new Date(timestamp)
+    }
+    const year = date.getFullYear()
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const day = date.getDate().toString().padStart(2, '0')
+    const hour = date.getHours().toString().padStart(2, '0')
+    const minute = date.getMinutes().toString().padStart(2, '0')
+    const second = date.getSeconds().toString().padStart(2, '0')
+    const milli = date.getMilliseconds().toString().padStart(3, '0')
+    let time
+    if (useMilliSeconds) {
+        time = `${year}-${month}-${day} ${hour}:${minute}:${second}.${milli}`
+    } else {
+        time = `${year}-${month}-${day} ${hour}:${minute}:${second}`
+    }
+    return time
+}

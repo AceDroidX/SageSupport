@@ -1,10 +1,31 @@
 <script setup lang="ts">
+import markdownit from "markdown-it";
+import mermaid from "mermaid";
 import { UserRole, type Message } from "sage-support-shared/prisma";
+import { nextTick, watch } from "vue";
 import account from "./icon/account.vue";
 import faceAgent from "./icon/face-agent.vue";
 import robot from "./icon/robot.vue";
 
 const props = defineProps<{ data: Message[]; role: UserRole }>();
+
+const md = markdownit({ langPrefix: "" });
+mermaid.initialize({
+  startOnLoad: false,
+  theme: "dark",
+  suppressErrorRendering: true,
+});
+watch(
+  () => props.data,
+  async () => {
+    await nextTick();
+    await mermaid.run({
+      querySelector: ".mermaid",
+      // suppressErrors: true,
+    });
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -32,9 +53,7 @@ const props = defineProps<{ data: Message[]; role: UserRole }>();
                     Anakin
                     <time class="text-xs opacity-50">12:46</time>
                 </div> -->
-        <div class="chat-bubble whitespace-pre-wrap">
-          {{ item.content }}
-        </div>
+        <div class="chat-bubble" v-html="md.render(item.content)"></div>
       </div>
       <div v-else class="flex justify-center">
         <div class="chat-bubble">

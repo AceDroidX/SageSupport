@@ -81,7 +81,7 @@ const contextualizeQPrompt = ChatPromptTemplate.fromMessages([
 
 // Answer question
 const systemTemplate = [
-    `You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise.`,
+    `You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know. Don't try to make up an answer. If the answer has steps, output markdown mermaid graph additionally. Be careful with Unicode text.`,
     `\n\n`,
     `Context:\n`,
     `{context}`,

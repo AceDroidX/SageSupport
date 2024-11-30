@@ -66,9 +66,9 @@ const auth = useAuthStore();
           tabindex="0"
           class="menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow"
         >
-          <li v-if="auth.data?.role == UserRole.ADMIN">
+          <!-- <li v-if="auth.data?.role == UserRole.ADMIN">
             <router-link to="/manage">管理后台</router-link>
-          </li>
+          </li> -->
           <!-- <li><a href="/purchase">历史订单</a></li> -->
           <li>
             <a

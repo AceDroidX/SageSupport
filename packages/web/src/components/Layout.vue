@@ -12,7 +12,9 @@ import NavBar from "@/components/NavBar.vue";
     />
     <div class="drawer-content flex flex-col">
       <nav-bar />
-      <slot name="content"></slot>
+      <div class="h-[calc(100vh-64px)]">
+        <slot name="content"></slot>
+      </div>
     </div>
     <div
       class="drawer-side peer-checked:pointer-events-auto peer-checked:visible peer-checked:sticky peer-checked:w-auto"

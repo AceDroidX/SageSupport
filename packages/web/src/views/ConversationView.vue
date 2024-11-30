@@ -28,6 +28,7 @@ watch(
     <ChatList
       :data="conversation.useMessage(Number(id)).value"
       :role="auth.data?.role ?? 'USER'"
+      class="overflow-y-auto"
     />
 
     <div class="flex gap-2">

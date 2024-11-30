@@ -1,4 +1,4 @@
-import type { Conversation, Message, User } from "./prisma"
+import type { Conversation, Message, User, UserRole } from "./prisma"
 
 export type WebSocketResponseEvent = {
     type: 'message'
@@ -34,3 +34,9 @@ export type Msg<T> = {
 
 export type LoginResponse = Msg<User>
 export type LogoutResponse = Msg<undefined>
+
+export const UserRoleName: { [key in UserRole]: string; } = {
+    USER: '用户',
+    SUPPORT: '人工客服',
+    ADMIN: '管理员'
+};

@@ -24,6 +24,7 @@ import { RouterLink, RouterView } from "vue-router";
         <!-- Sidebar content here -->
         <li>
           <RouterLink :to="'/admin/documents'">文档管理</RouterLink>
+          <RouterLink :to="'/admin/users'">用户管理</RouterLink>
         </li>
       </ul>
     </div>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/stores/auth";
-import { UserRole } from "sage-support-shared/prisma";
+import { UserRoleName } from "sage-support-shared";
 import { useRouter } from "vue-router";
 import ThemeButton from "./ThemeButton.vue";
 const router = useRouter();
@@ -58,9 +58,7 @@ const auth = useAuthStore();
           </div>
         </div> -->
         <div tabindex="0" role="button" class="avatar btn btn-ghost">
-          {{ auth.data?.role == UserRole.ADMIN ? "管理员" : "用户" }}：{{
-            auth.data?.name
-          }}
+          {{ UserRoleName[auth.data?.role] }}：{{ auth.data?.name }}
         </div>
         <ul
           tabindex="0"

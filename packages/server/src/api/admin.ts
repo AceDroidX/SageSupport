@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { db_document_create, db_document_delete, db_document_list } from "../database";
+import { db_document_create, db_document_delete, db_document_list, db_user_list } from "../database";
 import { llm_insertPDF } from "../llm";
 import { generateAlphabetUUID } from "../utils";
 import { vdb_deleteCollection } from "../weaviate";
@@ -60,6 +60,9 @@ export function add_router_admin(app: Hono) {
             console.error(e)
             return ctx.json({ code: 1, msg: JSON.stringify(e) }, 400)
         }
+    })
+    app.get('/admin/users', verifySession, verifyAdmin, async (ctx) => {
+        return ctx.json(await db_user_list())
     })
     // app.post('/admin/chat', verifySession, verifyAdmin, async (ctx) => {
     //     const data = await ctx.req.json<ChatRequest>()

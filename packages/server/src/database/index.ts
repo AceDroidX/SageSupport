@@ -149,3 +149,7 @@ export async function db_message_list(conversationId: number) {
         }
     })
 }
+
+export async function db_user_list() {
+    return await prisma.user.findMany()
+}

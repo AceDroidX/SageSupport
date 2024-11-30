@@ -19,6 +19,18 @@ export const useAuthStore = defineStore('auth', () => {
         data.value = resp.data.data
         return resp.data.data
     }
+    async function register(username: string, password: string) {
+        const resp = await axiosInstance.post<LoginResponse>('/register', {
+            username,
+            password,
+        })
+        if (resp.data.code !== 0) {
+            alert(resp.data.msg)
+            return
+        }
+        data.value = resp.data.data
+        return resp.data.data
+    }
     async function logout() {
         const resp = await axiosInstance.post<LogoutResponse>('/logout')
         if (resp.data.code !== 0) {
@@ -28,7 +40,7 @@ export const useAuthStore = defineStore('auth', () => {
         data.value = undefined
         return resp.data
     }
-    return { data, login, logout }
+    return { data, login, register, logout }
 }, {
     persist: true
 })

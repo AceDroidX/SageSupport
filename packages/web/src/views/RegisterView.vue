@@ -17,8 +17,8 @@ const auth = useAuthStore();
 const account = ref("");
 const password = ref("");
 
-async function login() {
-  const resp = await auth.login(account.value, password.value);
+async function register() {
+  const resp = await auth.register(account.value, password.value);
   if (!resp) return;
   // localStorage.setItem('role', resp.data.data.role)
   if (resp.role === UserRole.ADMIN) {
@@ -33,7 +33,7 @@ async function login() {
   <div
     class="flex h-screen w-screen flex-col items-center justify-center gap-4"
   >
-    <h1 class="text-xl font-bold">登录页面</h1>
+    <h1 class="text-xl font-bold">注册页面</h1>
     <label class="input input-bordered flex items-center gap-2">
       账号
       <input v-model="account" type="text" class="grow" placeholder="" />
@@ -42,20 +42,20 @@ async function login() {
       密码
       <input
         v-model="password"
-        @keyup.enter="login"
+        @keyup.enter="register"
         type="text"
         class="grow"
         placeholder=""
       />
     </label>
-    <button @click="login" class="btn btn-primary btn-wide text-white">
-      登录
+    <button @click="register" class="btn btn-primary btn-wide text-white">
+      注册
     </button>
     <button
-      @click="router.push('/register')"
+      @click="router.push('/login')"
       class="btn btn-primary btn-wide text-white"
     >
-      注册
+      登录
     </button>
   </div>
 </template>

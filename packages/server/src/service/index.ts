@@ -89,9 +89,9 @@ export async function service_post_user_msg(uid: number, conversationId: number,
         console.warn('user websocket not open', uid)
         return
     }
-    const message = await db_message_create(conversationId, msg, MessageType.USER, uid)
     const conversation = await db_conversation_by_id(conversationId)
     if (conversation?.supportUserId) { // 如果是人工客服模式
+        const message = await db_message_create(conversationId, msg, MessageType.USER, uid)
         const supportWS = supportWebsocketPool.get(conversation.supportUserId)
         if (!supportWS) {
             console.warn('support not online', conversation.supportUserId)
@@ -114,6 +114,8 @@ export async function service_post_user_msg(uid: number, conversationId: number,
         const data: WebSocketResponseEvent = { type: 'delta', conversationId, content: chunk.answer }
         ws.send(JSON.stringify(data))
     }
+    // 在llm之后存储用户消息 防止llm_streamInput的输入消息和历史消息重复
+    await db_message_create(conversationId, msg, MessageType.USER, uid)
     const db_msg = await db_message_create(conversationId, answer, MessageType.AI)
     const endData: WebSocketResponseEvent = { type: 'end', data: db_msg }
     ws.send(JSON.stringify(endData))

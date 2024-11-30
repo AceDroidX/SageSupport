@@ -22,24 +22,27 @@ watch(
 </script>
 
 <template>
-  <div class="flex h-full w-full flex-col items-center justify-center gap-4">
-    <h1 class="text-xl font-bold">会话 {{ id }}</h1>
+  <div class="flex h-full w-full flex-col items-center justify-center">
+    <!-- <h1 class="text-xl font-bold">会话 {{ id }}</h1> -->
 
     <ChatList
       :data="conversation.useMessage(Number(id)).value"
       :role="auth.data?.role ?? 'USER'"
-      class="overflow-y-auto"
     />
 
-    <div class="flex gap-2">
+    <div class="flex w-full justify-center gap-2 p-4">
       <input
         v-model="message"
         @keyup.enter="conversation.sendMessage(Number(id), message)"
         type="text"
-        class="input input-bordered"
+        placeholder="输入您的问题"
+        class="input input-bordered w-2/3 bg-base-200"
       />
       <button
-        @click="conversation.sendMessage(Number(id), message)"
+        @click="
+          conversation.sendMessage(Number(id), message);
+          message = '';
+        "
         class="btn btn-primary"
       >
         发送

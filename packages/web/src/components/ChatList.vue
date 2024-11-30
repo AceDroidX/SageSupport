@@ -2,13 +2,14 @@
 import markdownit from "markdown-it";
 import mermaid from "mermaid";
 import { UserRole, type Message } from "sage-support-shared/prisma";
-import { nextTick, watch } from "vue";
+import { nextTick, ref, watch } from "vue";
 import account from "./icon/account.vue";
 import faceAgent from "./icon/face-agent.vue";
 import robot from "./icon/robot.vue";
 
 const props = defineProps<{ data: Message[]; role: UserRole }>();
 
+const container = ref<HTMLDivElement>();
 const md = markdownit({ langPrefix: "" });
 mermaid.initialize({
   startOnLoad: false,
@@ -23,13 +24,20 @@ watch(
       querySelector: ".mermaid",
       // suppressErrors: true,
     });
+    container.value?.scrollTo({
+      top: container.value.scrollHeight,
+      behavior: "instant",
+    });
   },
   { immediate: true },
 );
 </script>
 
 <template>
-  <div class="flex h-full w-full flex-col gap-2">
+  <div
+    class="flex h-full w-full flex-col gap-2 overflow-y-auto p-8"
+    ref="container"
+  >
     <div v-for="item in props.data" :key="item.messageId">
       <div
         v-if="item.type !== 'SYSTEM'"

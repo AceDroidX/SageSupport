@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import plusCircleOutline from "@/components/icon/plus-circle-outline.vue";
 import Layout from "@/components/Layout.vue";
 import { useConversationStore } from "@/stores/conversation";
 import { RouterLink, RouterView } from "vue-router";
@@ -10,13 +11,16 @@ conversation.fetchConversationList();
 <template>
   <Layout>
     <template #sidebar>
-      <div class="flex flex-col bg-base-200 p-4 text-base-content">
+      <li>
         <RouterLink to="/">
-          <button class="btn btn-primary">新对话</button>
+          <plusCircleOutline class="w-6 fill-current" />
+          <div>新对话</div>
         </RouterLink>
-        <div class="text-lg font-bold">历史对话记录</div>
+      </li>
+      <div class="divider my-0"></div>
+      <div class="flex flex-col bg-base-200 p-4 text-base-content">
+        <div class="text-lg font-bold">历史记录</div>
       </div>
-      <!-- Sidebar content here -->
       <li
         v-for="item in conversation.conversationList"
         class="group flex flex-row flex-nowrap items-center"

@@ -17,12 +17,12 @@ async function send() {
 <template>
   <div class="flex h-full w-full flex-col items-center justify-center gap-4">
     <h1 class="text-xl font-bold">您遇到了什么问题？</h1>
-    <label class="flex gap-2">
+    <label class="flex w-1/2 gap-2">
       <input
         v-model="question"
         type="text"
         placeholder="输入您的问题"
-        class="input input-bordered w-full max-w-xs"
+        class="input input-bordered w-full bg-base-200"
       />
       <button @click="send" class="btn btn-primary">发送</button>
     </label>

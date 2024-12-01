@@ -1,8 +1,10 @@
 import type { Hono } from "hono";
+import { streamSSE } from 'hono/streaming';
 import type { UpgradeWebSocket } from "hono/ws";
 import type { ChatRequest } from "sage-support-shared";
 import { db_conversation_by_supportuid, db_conversation_with_msg_by_id } from "../database";
-import { service_post_support_msg, service_websocket, supportWebsocketPool } from "../service";
+import type { AssistantRequest } from "../model";
+import { service_post_assistant_msg, service_post_support_msg, service_websocket, supportWebsocketPool } from "../service";
 import { verifySession, verifySupport } from "./middleware";
 
 export function add_router_support(app: Hono, upgradeWebSocket: UpgradeWebSocket) {
@@ -20,5 +22,11 @@ export function add_router_support(app: Hono, upgradeWebSocket: UpgradeWebSocket
         const data = await ctx.req.json<ChatRequest>()
         service_post_support_msg(ctx.get('user').id, Number(ctx.req.param('id')), data.msg)
         return ctx.body(null, 204)
+    });
+    app.post('/support/assistant', verifySession, verifySupport, async (ctx) => {
+        const data = await ctx.req.json<AssistantRequest>()
+        return streamSSE(ctx, async (stream) => {
+            await service_post_assistant_msg(stream, data)
+        })
     });
 }

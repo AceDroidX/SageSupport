@@ -1,11 +1,13 @@
 import { AIMessage, HumanMessage, type BaseMessage } from "@langchain/core/messages";
 import type { Context } from "hono";
+import type { SSEStreamingApi } from "hono/streaming";
 import type { WSContext, WSEvents } from "hono/ws";
 import type { WebSocketResponseEvent } from "sage-support-shared";
 import { MessageType, type Conversation, type Message, type User, type UserRole } from "../../generated/client";
 import { db_create_session, db_register, db_userinfo_by_username } from "../database/auth.ts";
 import { db_conversation_by_id, db_conversation_set_supportuid, db_document_list, db_message_create, db_message_list, db_user_count_support_conversation } from "../database/index.ts";
 import { llm_streamInput } from "../llm.ts";
+import type { AssistantRequest } from "../model.ts";
 
 export async function init_user() {
     const admin = await db_userinfo_by_username('admin')
@@ -46,6 +48,10 @@ function message_db_to_llm(input: Message[]): BaseMessage[] {
             return new HumanMessage(`[${item.type} Message]:${item.content}`)
         }
     })
+}
+
+function message_db_to_user_with_prefix(input: Message[]): HumanMessage[] {
+    return input.map(item => new HumanMessage(`[${item.type}]:${item.content}`))
 }
 
 export async function service_set_supportuid(conversationId: number): Promise<Conversation | undefined> {
@@ -162,6 +168,20 @@ export async function service_post_support_msg(uid: number, conversationId: numb
     // const db_msg = await db_message_create(conversationId, answer, MessageType.AI)
     // const endData: WebSocketResponseEvent = { type: 'end', data: db_msg }
     // ws.send(JSON.stringify(endData))
+}
+
+export async function service_post_assistant_msg(stream: SSEStreamingApi, data: AssistantRequest) {
+    const interval = setInterval(() => {
+        stream.writeSSE({ data: '', event: 'ping' })
+    }, 1000)
+    for await (const chunk of await llm_streamInput(data.msg, await document_uuid_list(), [...message_db_to_user_with_prefix(data.context), ...message_db_to_llm(data.history)])) {
+        if (chunk.answer) console.write(chunk.answer)
+        else console.debug(chunk)
+        stream.writeSSE({ data: JSON.stringify(chunk), event: 'delta' })
+    }
+    clearInterval(interval)
+    await stream.close()
+    console.debug('chat发送完成')
 }
 
 export function service_websocket<T extends { Variables: { user: User } }>(ctx: Context<T>, websocketPool: Map<number, WSContext>): WSEvents<T> {

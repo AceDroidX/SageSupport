@@ -1,4 +1,4 @@
-import type { UserRole } from "../generated/client"
+import type { Message, UserRole } from "../generated/client"
 
 export type Msg<T> = {
     code: number
@@ -24,4 +24,10 @@ export type AdminUserAddRequest = {
     username: string;
     password: string;
     role: UserRole
+}
+
+export type AssistantRequest = {
+    msg: string
+    history: Message[]
+    context: Message[]
 }

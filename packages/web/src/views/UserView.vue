@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import plusCircleOutline from "@/components/icon/plus-circle-outline.vue";
 import Layout from "@/components/Layout.vue";
+import { useAuthStore } from "@/stores/auth";
 import { useConversationStore } from "@/stores/conversation";
 import { RouterLink, RouterView } from "vue-router";
 
 const conversation = useConversationStore();
 conversation.fetchConversationList();
+const auth = useAuthStore();
 </script>
 
 <template>
   <Layout>
     <template #sidebar>
-      <li>
+      <li :class="auth.data?.role == 'SUPPORT' ? 'invisible' : ''">
         <RouterLink to="/">
           <plusCircleOutline class="w-6 fill-current" />
           <div>新对话</div>

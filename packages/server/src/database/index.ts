@@ -41,6 +41,16 @@ export async function db_document_by_uuid(uuid: string) {
     })
 }
 
+export async function db_document_by_textSplitsId(textSplitsId: string) {
+    return await prisma.document.findFirst({
+        where: {
+            textSplitsId: {
+                has: textSplitsId
+            }
+        }
+    })
+}
+
 export async function db_document_list() {
     return await prisma.document.findMany()
 }

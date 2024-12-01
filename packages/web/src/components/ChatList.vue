@@ -22,7 +22,7 @@ watch(
     await nextTick();
     await mermaid.run({
       querySelector: ".mermaid",
-      // suppressErrors: true,
+      suppressErrors: true,
     });
     container.value?.scrollTo({
       top: container.value.scrollHeight,

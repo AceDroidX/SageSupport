@@ -35,3 +35,10 @@ export type User = {
     name: string;
     role: UserRole;
 }
+
+export type Documents = {
+    name: string;
+    uuid: string;
+    textSplitsId: string[];
+    graph: string;
+}

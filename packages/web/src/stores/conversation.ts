@@ -2,7 +2,7 @@ import type { ChatSSEResponse } from '@/model'
 import { axiosInstance } from '@/utils'
 import { EventStreamContentType, fetchEventSource } from '@microsoft/fetch-event-source'
 import { defineStore } from 'pinia'
-import type { ConversationWithMessages, WebSocketResponseEvent } from 'sage-support-shared'
+import type { Context, ConversationWithMessages, WebSocketResponseEvent } from 'sage-support-shared'
 import { MessageType, UserRole, type Conversation, type Message } from 'sage-support-shared/prisma'
 import { computed, ref, watch, type ComputedRef } from 'vue'
 import { useRouter } from 'vue-router'
@@ -17,6 +17,7 @@ export const useConversationStore = defineStore('conversation', () => {
   const deltaDict = ref(new Map<number, string>())
   const assistantDict = ref(new Map<number, Message[]>())
   const assistantDeltaDict = ref(new Map<number, string>())
+  const context = ref<Context[]>()
 
   async function switchConversation(id: number) {
     console.log('switch conversation', id)
@@ -135,7 +136,7 @@ export const useConversationStore = defineStore('conversation', () => {
               assistantDeltaDict.value.set(conversationId, (delta ?? '') + (data.answer ?? ''))
             }
             if (data.context) {
-              console.log(data.context)
+              context.value = data.context
             }
           }
         } catch (error) {
@@ -225,5 +226,5 @@ export const useConversationStore = defineStore('conversation', () => {
     }
   }
 
-  return { conversationList, switchConversation, useMessage, useConversation, fetchConversation, fetchConversationList, deleteConversation, newMessage, sendMessage, toSupport, useAssistant, sendAssistant }
+  return { conversationList, context, switchConversation, useMessage, useConversation, fetchConversation, fetchConversationList, deleteConversation, newMessage, sendMessage, toSupport, useAssistant, sendAssistant }
 })

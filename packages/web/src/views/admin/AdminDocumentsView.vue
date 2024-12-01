@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { Documents } from "@/model";
 import { axiosInstance } from "@/utils";
 import mermaid from "mermaid";
+import type { Documents } from "sage-support-shared/prisma";
 import svgPanZoom from "svg-pan-zoom";
 import { ref } from "vue";
 

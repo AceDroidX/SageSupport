@@ -40,3 +40,19 @@ export const UserRoleName: { [key in UserRole]: string; } = {
     SUPPORT: '人工客服',
     ADMIN: '管理员'
 };
+
+export type Context = {
+    id: string
+    pageContent: string
+    metadata: {
+        loc_lines_from: number
+        loc_lines_to: number
+        loc_pageNumber: number
+        source: string
+    }
+}
+
+export type TextSplitsIdWithName = {
+    id: string;
+    name: string | undefined;
+}

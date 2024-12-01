@@ -1,16 +1,35 @@
 <script setup lang="ts">
 import ChatList from "@/components/ChatList.vue";
+import Modal from "@/components/Modal.vue";
 import { useAuthStore } from "@/stores/auth";
 import { useConversationStore } from "@/stores/conversation";
-import { nextTick, ref, watch } from "vue";
+import { axiosInstance } from "@/utils";
+import type { TextSplitsIdWithName } from "sage-support-shared";
+import { nextTick, ref, useTemplateRef, watch } from "vue";
 
 const props = defineProps<{ id: string }>();
 
 const conversation = useConversationStore();
 const auth = useAuthStore();
-
+const ModalRef = useTemplateRef<InstanceType<typeof Modal>>("ModalRef");
 const message = ref("");
 const assistantMessage = ref("");
+const documentsMap = ref(new Map<string, string>());
+
+async function getDocuments() {
+  if (!conversation.context) return;
+  const resp = await axiosInstance.get<TextSplitsIdWithName[]>(
+    "/support/documents/name",
+    {
+      params: {
+        id: conversation.context.map((item) => item.id),
+      },
+    },
+  );
+  for (const item of resp.data) {
+    documentsMap.value.set(item.id, item.name ?? item.id);
+  }
+}
 
 watch(
   () => props.id,
@@ -89,17 +108,35 @@ watch(
         >
           发送
         </button>
-        <!-- <button
-          v-if="
-            auth.data?.role == 'USER' &&
-            !conversation.useConversation(Number(id)).value?.supportUserId
+        <button
+          @click="
+            ModalRef?.open();
+            getDocuments();
           "
-          @click="conversation.toSupport(Number(id))"
           class="btn btn-primary"
         >
-          转人工
-        </button> -->
+          引用资料
+        </button>
       </div>
     </div>
+    <Modal ref="ModalRef" fullMaxWidth fullMaxHeight>
+      <div class="text-lg font-bold">引用文档</div>
+      <div class="flex flex-col gap-2">
+        <div v-for="item in conversation.context" class="flex flex-col gap-2">
+          <!-- <div>{{ item.id }}</div> -->
+          <div class="flex gap-8">
+            <div>{{ documentsMap.get(item.id) }}</div>
+            <div>
+              第{{ item.metadata.loc_pageNumber }}页
+              {{ item.metadata.loc_lines_from }}-{{
+                item.metadata.loc_lines_to
+              }}行
+            </div>
+          </div>
+          <div>{{ item.pageContent }}</div>
+          <div class="divider m-0"></div>
+        </div>
+      </div>
+    </Modal>
   </div>
 </template>

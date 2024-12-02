@@ -7,7 +7,11 @@ import account from "./icon/account.vue";
 import faceAgent from "./icon/face-agent.vue";
 import robot from "./icon/robot.vue";
 
-const props = defineProps<{ data: Message[]; role: UserRole }>();
+const props = defineProps<{
+  data: Message[];
+  delta?: string;
+  role: UserRole;
+}>();
 
 const container = ref<HTMLDivElement>();
 const md = markdownit({ langPrefix: "" });
@@ -69,6 +73,19 @@ watch(
         </div>
       </div>
       <!-- <div class="chat-footer opacity-50">Seen at 12:46</div> -->
+    </div>
+    <div v-if="props.delta !== undefined" class="chat chat-start">
+      <div class="avatar placeholder chat-image">
+        <div class="h-10 w-10 rounded-full">
+          <div
+            class="flex h-10 w-10 justify-center rounded-full bg-neutral text-neutral-content"
+          >
+            <robot />
+          </div>
+        </div>
+      </div>
+      <div class="chat-bubble" v-html="md.render(props.delta)"></div>
+      <div class="chat-footer opacity-50">生成中</div>
     </div>
   </div>
 </template>

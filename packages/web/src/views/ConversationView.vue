@@ -45,7 +45,8 @@ watch(
   <div class="flex h-full w-full">
     <div class="flex h-full w-full flex-col items-center justify-center">
       <ChatList
-        :data="conversation.useMessage(Number(id)).value"
+        :data="conversation.conversationDict.get(Number(id)) ?? []"
+        :delta="conversation.deltaDict.get(Number(id))"
         :role="auth.data?.role ?? 'USER'"
       />
       <div class="flex w-full justify-center gap-2 p-4">
@@ -86,7 +87,8 @@ watch(
       class="flex h-full w-full flex-col items-center justify-center"
     >
       <ChatList
-        :data="conversation.useAssistant(Number(id)).value"
+        :data="conversation.assistantDict.get(Number(id)) ?? []"
+        :delta="conversation.assistantDeltaDict.get(Number(id))"
         role="USER"
       />
       <div class="flex w-full justify-center gap-2 p-4">

@@ -4,7 +4,7 @@ import { EventStreamContentType, fetchEventSource } from '@microsoft/fetch-event
 import { defineStore } from 'pinia'
 import type { Context, ConversationWithMessages, WebSocketResponseEvent } from 'sage-support-shared'
 import { MessageType, UserRole, type Conversation, type Message } from 'sage-support-shared/prisma'
-import { computed, ref, watch, type ComputedRef } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from './auth'
 
@@ -25,16 +25,6 @@ export const useConversationStore = defineStore('conversation', () => {
     if (auth.data?.role == UserRole.SUPPORT && !assistantDict.value.has(id)) {
       await sendAssistant(id)
     }
-  }
-
-  function useMessage(id: number): ComputedRef<Message[]> {
-    const conversation = conversationDict.value.get(id) ?? []
-    const delta = deltaDict.value.get(id)
-    const deltaMessage = delta ? { messageId: 0, content: delta, type: MessageType.AI, createdAt: new Date(), conversationId: id, userId: null } : undefined
-    return computed(() => {
-      if (deltaMessage) return [...conversation, deltaMessage]
-      else return conversation
-    })
   }
 
   function useConversation(id: number) {
@@ -94,16 +84,6 @@ export const useConversationStore = defineStore('conversation', () => {
     }
     const resp = await axiosInstance.put<Conversation[]>(`/${auth.data.role.toLowerCase()}/conversation/${id}/support`)
     conversationList.value = resp.data
-  }
-
-  function useAssistant(id: number): ComputedRef<Message[]> {
-    const conversation = assistantDict.value.get(id) ?? []
-    const delta = assistantDeltaDict.value.get(id)
-    const deltaMessage = delta ? { messageId: 0, content: delta, type: MessageType.AI, createdAt: new Date(), conversationId: id, userId: null } : undefined
-    return computed(() => {
-      if (deltaMessage) return [...conversation, deltaMessage]
-      else return conversation
-    })
   }
 
   async function sendAssistant(conversationId: number, msg?: string) {
@@ -226,5 +206,5 @@ export const useConversationStore = defineStore('conversation', () => {
     }
   }
 
-  return { conversationList, context, switchConversation, useMessage, useConversation, fetchConversation, fetchConversationList, deleteConversation, newMessage, sendMessage, toSupport, useAssistant, sendAssistant }
+  return { conversationList, conversationDict, deltaDict, assistantDict, assistantDeltaDict, context, switchConversation, useConversation, fetchConversation, fetchConversationList, deleteConversation, newMessage, sendMessage, toSupport, sendAssistant }
 })

@@ -121,7 +121,8 @@ export async function llm_insertPDF(filePathOrBlob: string | Blob, documentUuid:
     const loader = new PDFLoader(filePathOrBlob);
     const docs = await loader.load();
     console.log(docs.length);
-    const graph = await llm_graph(docs);
+    // const graph = await llm_graph(docs);
+    const graph = ""
     const textSplitsId = await insertDocument(docs, documentUuid)
     return { textSplitsId, graph }
 }

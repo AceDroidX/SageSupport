@@ -27,24 +27,24 @@ async function deleteDocument(uuid: string) {
   await getDocuments();
 }
 
-async function showGraph(item: Documents) {
-  console.log(await mermaid.parse(item.graph));
-  const { svg } = await mermaid.render("mermaid", item.graph);
-  if (mermaidElement.value) mermaidElement.value.innerHTML = svg;
-  svgPanZoom("#mermaid", {
-    zoomEnabled: true,
-    controlIconsEnabled: true,
-    fit: true,
-    center: true,
-  });
-  document.getElementById("mermaid")?.setAttribute("height", "100%");
-}
+// async function showGraph(item: Documents) {
+//   console.log(await mermaid.parse(item.graph));
+//   const { svg } = await mermaid.render("mermaid", item.graph);
+//   if (mermaidElement.value) mermaidElement.value.innerHTML = svg;
+//   svgPanZoom("#mermaid", {
+//     zoomEnabled: true,
+//     controlIconsEnabled: true,
+//     fit: true,
+//     center: true,
+//   });
+//   document.getElementById("mermaid")?.setAttribute("height", "100%");
+// }
 
-mermaid.initialize({
-  startOnLoad: false,
-  securityLevel: "loose",
-  theme: "dark",
-});
+// mermaid.initialize({
+//   startOnLoad: false,
+//   securityLevel: "loose",
+//   theme: "dark",
+// });
 getDocuments();
 </script>
 
@@ -59,7 +59,8 @@ getDocuments();
               v-for="item in documents"
               class="flex flex-row flex-nowrap items-center"
             >
-              <div @click="showGraph(item)">{{ item.name }}</div>
+              <!-- <div @click="showGraph(item)">{{ item.name }}</div> -->
+              <div>{{ item.name }}</div>
               <button
                 @click="deleteDocument(item.uuid)"
                 class="btn btn-ghost btn-sm"
@@ -86,9 +87,9 @@ getDocuments();
         </div>
       </div>
     </div>
-    <div class="flex h-96 min-h-full w-full flex-col gap-2">
+    <!-- <div class="flex h-96 min-h-full w-full flex-col gap-2">
       <div>知识图谱</div>
       <div class="h-full min-h-full w-full" ref="mermaidElement"></div>
-    </div>
+    </div> -->
   </div>
 </template>

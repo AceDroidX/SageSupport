@@ -63,7 +63,7 @@ const textSplitter = new RecursiveCharacterTextSplitter({
 const OPENAI_MODEL = import.meta.env["OPENAI_MODEL"]
 const llm = OPENAI_MODEL ? new ChatOpenAI({
     model: OPENAI_MODEL,
-}) : new ChatOllama({ model: 'qwen2.5:3b' })
+}) : new ChatOllama({ model: 'qwen2.5:14b' })
 
 // Contextualize question
 const contextualizeQSystemPrompt =

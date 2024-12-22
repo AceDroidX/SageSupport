@@ -231,50 +231,286 @@ graph TB;
 
 ```mermaid
 erDiagram
-    Auth ||--o{ User : "belongsTo"
-    Session ||--o{ User : "belongsTo"
-    User }|--|| Conversation : "hasMany"
-    Conversation ||--o{ Message : "hasMany"
-    Document {
-        string uuid PK
-        string name
-        string[] textSplitsId
-        string graph
+  Auth {
+    int id PK
+    String passwd
+    String salt
+    int userId FK
+  }
+  Session {
+    int id PK
+    String token UK
+    DateTime expire
+    int userId FK
+  }
+  User {
+    int id PK
+    String name UK
+    UserRole role
+  }
+  Conversation {
+    int id PK
+    String title
+    int userId FK
+    int supportUserId FK
+  }
+  Message {
+    int messageId PK
+    String content
+    MessageType type
+    DateTime createdAt
+    int conversationId FK
+    int userId FK
+  }
+  Document {
+      String uuid PK
+      String name
+      String[] textSplitsId
+      String graph
+  }
+
+  User ||--o{ Auth : has
+  User ||--o{ Session : has
+  User ||--o{ Conversation : participates
+  User ||--o{ Conversation : supports
+  User ||--o{ Message : sent
+  Conversation ||--o{ Message : has
+  Auth }o--|| User : "userId"
+  Session }o--|| User : "userId"
+  Conversation }o--|| User : "userId"
+  Conversation }o--o| User : "supportUserId"
+  Message }o--|| Conversation : "conversationId"
+  Message }o--o| User : "userId"
+```
+
+```mermaid
+%% 业务流程图
+graph TD
+
+    subgraph 登录
+        A[用户登录]
+        B(判断用户角色)
+    end
+    
+    subgraph 管理员功能
+        C[管理员登录]
+        D{需要执行的操作}
+        E[编辑知识库]
+        F[数据分析]
+        G[用户管理]
+
+        B -->|是（管理员）| C
+        C --> D
+        D -->|编辑知识库| E
+        D -->|数据分析| F
+        D -->|用户管理| G
+    end
+
+    subgraph 客服功能
+        H{需要执行的操作}
+        I[互动交流]
+        J[AI辅助回答]
+        K[查看对话历史]
+
+        B -->|是（客服）| H
+        H -->|互动交流| I
+        H -->|AI辅助回答| J
+        H -->|查看对话记录| K
+    end
+
+    subgraph 客户端功能
+        L{是否需要人工介入}
+        M[自助查询]
+        N[智能推荐]
+        O(满意度反馈)
+        
+        B -->|否（普通用户）| L
+        L -->|否| M
+        M -->|否| N
+        N --> O
+        M -->|是| H
+    end
+
+    A --> B
+```
+
+```mermaid
+%% 功能结构图
+graph TD
+    A[客服问答辅助系统] --> B(注册/登录)
+    B --> C{用户}
+    B --> D{人工客服}
+    B --> E{管理员}
+
+    C --> F1(转接人工客服)
+    C --> G1(满意度反馈)
+    C --> H1(智能推荐)
+    C --> I1(自助查询)
+
+    D --> J1(查看对话历史)
+    D --> K1(AI辅助)
+    D --> L1(互动交流)
+
+    E --> M1(编辑知识库)
+    E --> N1(用户管理)
+    E --> O1(数据分析)
+```
+
+```mermaid
+%% 系统类图
+classDiagram
+    class Hono {
+        +get(path: string, handler: function)
+        +post(path: string, handler: function)
+        +delete(path: string, handler: function)
+        +put(path: string, handler: function)
+        +use(middleware: function)
     }
 
-    Auth {
-        int id PK
-        string passwd
-        string salt
-        int userId FK
+    class User {
+        +id: number
+        +name: string
+        +role: UserRole
     }
 
-    Session {
-        int id PK
-        string token
-        datetime expire
-        int userId FK
+    class Conversation {
+        +id: number
+        +title: string
+        +userId: number
+        +supportUserId: number
     }
 
-    User {
-        int id PK
-        string name
-        UserRole role
-        Auth Auth
-        Session[] Session
+    class Message {
+        +id: number
+        +conversationId: number
+        +content: string
+        +type: MessageType
+        +userId: number
     }
 
-    Conversation {
-        int id PK
-        Message[] message
-        int userId FK
+    class Document {
+        +uuid: string
+        +name: string
+        +textSplitsId: string[]
+        +graph: string
     }
 
-    Message {
-        int messageId PK
-        string content
-        MessageType type
-        datetime createdAt
-        int conversationId FK
+    class PrismaClient {
+        +document: Document
+        +conversation: Conversation
+        +message: Message
+        +user: User
     }
+
+    class WeaviateClient {
+        +collections: Collection
+    }
+
+    class Collection {
+        +listAll(): Promise
+        +delete(name: string): Promise
+        +get(name: string): Collection
+        +iterator(): AsyncIterator
+    }
+
+    class Langchain {
+        +splitDocuments(docs: Document[]): Promise
+        +stream(input: string, options: object): AsyncIterator
+    }
+
+    class CallbackHandler {
+        +publicKey: string
+        +secretKey: string
+        +baseUrl: string
+    }
+
+    class PDFLoader {
+        +load(): Promise
+    }
+
+    class RecursiveCharacterTextSplitter {
+        +splitDocuments(docs: Document[]): Promise
+    }
+
+    class ChineseRecursiveTextSplitter {
+        +splitDocuments(docs: Document[]): Promise
+    }
+
+    class ChatOpenAI {
+        +model: string
+    }
+
+    class ChatOllama {
+        +model: string
+    }
+
+    class ChatPromptTemplate {
+        +fromMessages(messages: string[]): ChatPromptTemplate
+    }
+
+    class EnsembleRetriever {
+        +retrievers: Retriever[]
+        +weights: number[]
+    }
+
+    class WeaviateStore {
+        +addDocuments(docs: Document[]): Promise
+        +asRetriever(options: object): Retriever
+    }
+
+    class Retriever {
+        +retrieve(query: string): Promise
+    }
+
+    class SSEStreamingApi {
+        +writeSSE(event: object)
+        +close(): Promise
+    }
+
+    class WSContext {
+        +send(data: string)
+        +readyState: number
+    }
+
+    class WebSocketResponseEvent {
+        +type: string
+        +data: object
+    }
+
+    Hono --> PrismaClient
+    Hono --> WeaviateClient
+    Hono --> Langchain
+    Hono --> CallbackHandler
+    Hono --> SSEStreamingApi
+    Hono --> WSContext
+
+    PrismaClient --> User
+    PrismaClient --> Conversation
+    PrismaClient --> Message
+    PrismaClient --> Document
+
+    WeaviateClient --> Collection
+
+    Collection --> Document
+
+    Langchain --> RecursiveCharacterTextSplitter
+    Langchain --> ChineseRecursiveTextSplitter
+    Langchain --> ChatOpenAI
+    Langchain --> ChatOllama
+    Langchain --> ChatPromptTemplate
+    Langchain --> EnsembleRetriever
+    Langchain --> WeaviateStore
+
+    RecursiveCharacterTextSplitter --> Document
+    ChineseRecursiveTextSplitter --> Document
+
+    ChatPromptTemplate --> Retriever
+
+    EnsembleRetriever --> Retriever
+
+    WeaviateStore --> Document
+    WeaviateStore --> Retriever
+
+    SSEStreamingApi --> WebSocketResponseEvent
+    WSContext --> WebSocketResponseEvent
 ```
